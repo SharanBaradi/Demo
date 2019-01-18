@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,79 +8,91 @@ namespace DijkstraAlgorithm
 {
     class Dijkstra
     {
-        private static int MinimumDistance(int[] distance, bool[] shortestPathTreeSet, int verticesCount)
+        public static int[] ShortestPathLength(int[,] Graph, int Source, int Destination, int NodesCount)
         {
-            int min = int.MaxValue;
-            int minIndex = 0;
-
-            for (int v = 0; v < verticesCount; ++v)
+            //Calculating the shortest path
+            int[] Distance = new int[NodesCount];
+            int minIndex = Source, Minimum, j;
+            bool[] ShortestPathTreeSet = new bool[NodesCount];
+            int[] Path = new int[NodesCount];
+            for (int i = 0; i < NodesCount; i++)
             {
-                if (shortestPathTreeSet[v] == false && distance[v] <= min)
+                Path[i] = Int32.MaxValue;
+            }
+            for (int i = 0; i < NodesCount; ++i)
+            {
+                Distance[i] = int.MaxValue;
+                ShortestPathTreeSet[i] = false;
+            }
+            Distance[Source] = 0;
+            for (int i = 0; i < NodesCount - 1; ++i)
+            {
+                for (j = 0; j < NodesCount; j++)
                 {
-                    min = distance[v];
-                    minIndex = v;
+                    if (Graph[minIndex, j] > 0 && Distance[j] > Distance[minIndex] + Graph[minIndex, j])
+                    {
+                        Distance[j] = Distance[minIndex] + Graph[minIndex, j];
+                        Path[j] = minIndex;
+                    }
+                }
+                ShortestPathTreeSet[minIndex] = true;
+                Minimum = int.MaxValue;
+                for (int v = 0; v < NodesCount; ++v)
+                {
+                    if (ShortestPathTreeSet[v] == false && Distance[v] <= Minimum)
+                    {
+                        Minimum = Distance[v];
+                        minIndex = v;
+                    }
                 }
             }
-
-            return minIndex;
-        }
-
-        private static void Print(int[] distance, int verticesCount)
-        {
-            Console.WriteLine("Vertex    Distance from source");
-
-            for (int i = 0; i < verticesCount; ++i)
-                Console.WriteLine("{0}\t  {1}", i, distance[i]);
-        }
-
-        public static void DijkstraAlgo(int[,] graph, int source, int verticesCount)
-        {
-            int[] distance = new int[verticesCount];
-            bool[] shortestPathTreeSet = new bool[verticesCount];
-
-            for (int i = 0; i < verticesCount; ++i)
+            if (Distance[Destination] != Int32.MaxValue)
             {
-                distance[i] = int.MaxValue;
-                shortestPathTreeSet[i] = false;
+                TracePath(Path, Destination);
+                Console.WriteLine(Destination);
             }
-
-            distance[source] = 0;
-
-            for (int count = 0; count < verticesCount - 1; ++count)
+            else
             {
-                int u = MinimumDistance(distance, shortestPathTreeSet, verticesCount);
-                shortestPathTreeSet[u] = true;
-
-                for (int v = 0; v < verticesCount; ++v)
-                    if (!shortestPathTreeSet[v] && Convert.ToBoolean(graph[u, v]) && distance[u] != int.MaxValue && distance[u] + graph[u, v] < distance[v])
-                        distance[v] = distance[u] + graph[u, v];
+                Console.WriteLine("Node Unavailable");
             }
-
-            Print(distance, verticesCount);
+            Console.WriteLine("Distance : " + Distance[Destination]);
+            return Path;
         }
-
+        public static void TracePath(int[] Path, int Destination)
+        {
+            if (Path[Destination] == Int32.MaxValue)
+            {
+                return;
+            }
+            TracePath(Path, Path[Destination]);
+            Console.Write(Path[Destination] + "-->");
+        }
         static void Main(string[] args)
         {
-            int[,] graph =  {
-                         { 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                         { 1, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                         { 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                         { 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 8, 0, 0, 0},
-                         { 0, 3, 0, 0, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0},
-                         { 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                         { 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 3, 0, 0, 0},
-                         { 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0},
-                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                         { 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0},
-                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 2, 0, 0, 0},
-                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-
-                                                     };
-
-            DijkstraAlgo(graph, 0, 9);
+            int Source = 1, Destination = 13, NodesCount = 14;
+            /* 
+            Console.WriteLine("Enter Source :");
+            Source = Int32.Parse(Console.ReadLine());
+            Console.WriteLine("Enter Destination :");
+            Destination = Int32.Parse(Console.ReadLine());
+            */
+            int[,] Graph = {
+                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                         { 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                         { 0, 1, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0},
+                         { 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                         { 0, 0, 0, 1, 0, 0, 6, 0, 0, 0, 0, 0, 8, 0},
+                         { 0, 0, 3, 0, 0, 0, 1, 0, 0, 4, 0, 0, 0, 0},
+                         { 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                         { 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 3, 0},
+                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3},
+                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                         { 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+                         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 2, 0},
+                    };
+            ShortestPathLength(Graph, Source, Destination, NodesCount);
         }
     }
 }
